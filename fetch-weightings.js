@@ -6,24 +6,19 @@ require("dotenv").config();
 const fetchFloorPrice = async (address) => {
   console.log("Fetching floor...");
 
-  const url = "http://api.spicyest.com/floor?address=" + address;
+  const url = "http://api.spicyest.com/listing_floor?address=" + address;
 
-  const { price } = await fetch(url, {
+  const { floor } = await fetch(url, {
     headers: {
       accept: "*/*",
       "X-API-Key": process.env.SPICYEST_API_KEY,
     },
   }).then((r) => r.json());
 
-  return price;
+  return floor;
 };
 
-const fetchSpicyestWeightings = async (
-  address,
-  floorPrice,
-  totalSupply,
-  name
-) => {
+const fetchSpicyestWeightings = async (address, totalSupply, name) => {
   console.log("Fetching spicyest weightings...");
 
   let nextPage;
@@ -48,6 +43,8 @@ const fetchSpicyestWeightings = async (
     console.log(`Progress: ${prices.length} / ${totalSupply}...`);
   } while (nextPage);
 
+  const floorPrice = prices.sort((a, b) => a.price - b.price)[0].price;
+
   const weightings = Object.fromEntries(
     prices.map(({ tokenID, price }) => [tokenID, price / floorPrice])
   );
@@ -60,7 +57,7 @@ const fetchSpicyestWeightings = async (
   return weightings;
 };
 
-const fetchNabuWeightings = async (address, floorPrice, totalSupply, name) => {
+const fetchNabuWeightings = async (address, totalSupply, name) => {
   console.log("Fetching nabu weightings...");
 
   let offset = 0;
@@ -83,6 +80,9 @@ const fetchNabuWeightings = async (address, floorPrice, totalSupply, name) => {
     console.log(`Progress: ${prices.length} / ${totalSupply}...`);
   }
 
+  const floorPrice = prices.sort((a, b) => a.price_eth - b.price_eth)[0]
+    .price_eth;
+
   const weightings = Object.fromEntries(
     prices.map(({ token_id, price_eth }) => [token_id, price_eth / floorPrice])
   );
@@ -95,18 +95,13 @@ const fetchNabuWeightings = async (address, floorPrice, totalSupply, name) => {
   return weightings;
 };
 
-const fetchUpshotWeightings = async (
-  address,
-  floorPrice,
-  totalSupply,
-  name
-) => {
+const fetchUpshotWeightings = async (address, totalSupply, name) => {
   console.log("Fetching upshot weightings...");
 
   let offset = 0;
   let prices = [];
   while (true) {
-    const url = `https://api.upshot.xyz/v2/collections/${address}/assets?limit=1000&offset=${offset}&listed=false&include_stats=true&include_count=false`;
+    const url = `https://api.upshot.xyz/v2/collections/${address}/assets?limit=500&offset=${offset}&include_stats=true&include_count=false&sort_order=last_sale_wei`;
 
     const resp = await fetch(url, {
       headers: {
@@ -115,13 +110,23 @@ const fetchUpshotWeightings = async (
       },
     }).then((r) => r.json());
 
-    offset += resp.data.assets.length - 20;
+    offset += resp.data.assets.length;
     prices = prices.concat(resp.data.assets);
 
-    if (resp.data.assets.length === 20) break;
+    if (resp.data.assets.length === 0) break;
 
     console.log(`Progress: ${prices.length} / ${totalSupply}...`);
   }
+
+  const floorPrice = Number(
+    formatEther(
+      prices
+        .slice()
+        .sort(
+          (a, b) => formatEther(a.appraisal.wei) - formatEther(b.appraisal.wei)
+        )[0].appraisal.wei
+    )
+  );
 
   const weightings = Object.fromEntries(
     prices.map(({ token_id, appraisal: { wei } }) => [
@@ -150,21 +155,14 @@ const main = async () => {
 
   const spicyestWeightings = await fetchSpicyestWeightings(
     address,
-    floorPrice,
     totalSupply,
     name
   );
 
-  const nabuWeightings = await fetchNabuWeightings(
-    address,
-    floorPrice,
-    totalSupply,
-    name
-  );
+  const nabuWeightings = await fetchNabuWeightings(address, totalSupply, name);
 
   const upshotWeightings = await fetchUpshotWeightings(
     address,
-    floorPrice,
     totalSupply,
     name
   );

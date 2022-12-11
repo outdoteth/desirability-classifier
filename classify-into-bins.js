@@ -17,7 +17,7 @@ const main = async () => {
 
   const FLOOR_SAFE_UPPER_BOUND = 1.25;
   const MID_LOWER_BOUND = FLOOR_SAFE_UPPER_BOUND;
-  const MID_SAFE_UPPER_BOUND = 3;
+  const MID_SAFE_UPPER_BOUND = 2;
 
   // generate bins
   const floorSafeTokenIds = [];
@@ -29,30 +29,39 @@ const main = async () => {
     const nabuWeighting = nabuWeightings[tokenId];
     const upshotWeighting = upshotWeightings[tokenId];
 
-    if (
-      spicyestWeighting <= FLOOR_SAFE_UPPER_BOUND &&
-      nabuWeighting <= FLOOR_SAFE_UPPER_BOUND &&
-      upshotWeighting <= FLOOR_SAFE_UPPER_BOUND
-    ) {
+    const spicyestFloorSafe =
+      spicyestWeighting <= FLOOR_SAFE_UPPER_BOUND ? 1 : 0;
+    const nabuFloorSafe = nabuWeighting <= FLOOR_SAFE_UPPER_BOUND ? 1 : 0;
+    const upshotFloorSafe = upshotWeighting <= FLOOR_SAFE_UPPER_BOUND ? 1 : 0;
+
+    if (spicyestFloorSafe + nabuFloorSafe + upshotFloorSafe >= 2) {
       floorSafeTokenIds.push(tokenId);
     }
 
-    if (
+    const spicyestSafeMid =
       spicyestWeighting >= MID_LOWER_BOUND &&
-      spicyestWeighting <= MID_SAFE_UPPER_BOUND &&
+      spicyestWeighting <= MID_SAFE_UPPER_BOUND
+        ? 1
+        : 0;
+    const upshotSafeMid =
       upshotWeighting >= MID_LOWER_BOUND &&
-      upshotWeighting <= MID_SAFE_UPPER_BOUND &&
-      nabuWeighting >= MID_LOWER_BOUND &&
-      nabuWeighting <= MID_SAFE_UPPER_BOUND
-    ) {
+      upshotWeighting <= MID_SAFE_UPPER_BOUND
+        ? 1
+        : 0;
+    const nabuSafeMid =
+      nabuWeighting >= MID_LOWER_BOUND && nabuWeighting <= MID_SAFE_UPPER_BOUND
+        ? 1
+        : 0;
+
+    if (spicyestSafeMid + upshotSafeMid + nabuSafeMid >= 2) {
       midSafeTokenIds.push(tokenId);
     }
 
-    if (
-      spicyestWeighting >= MID_LOWER_BOUND &&
-      upshotWeighting >= MID_LOWER_BOUND &&
-      nabuWeighting >= MID_LOWER_BOUND
-    ) {
+    const spicyestMid = spicyestWeighting >= MID_LOWER_BOUND ? 1 : 0;
+    const upshotMid = upshotWeighting >= MID_LOWER_BOUND ? 1 : 0;
+    const nabuMid = nabuWeighting >= MID_LOWER_BOUND ? 1 : 0;
+
+    if (spicyestMid + upshotMid + nabuMid >= 2) {
       midTokenIds.push(tokenId);
     }
   }
@@ -77,8 +86,9 @@ const main = async () => {
     JSON.stringify(floorBin, null, 2)
   );
 
-  console.log("Floor bin size: " + floorSafeTokenIds.length);
-  console.log("Mid bin size: " + midSafeTokenIds.length);
+  console.log("Floor safe bin size: " + floorSafeTokenIds.length);
+  console.log("Mid safe bin size: " + midSafeTokenIds.length);
+  console.log("Mid bin size: " + midTokenIds.length);
 };
 
 main();
