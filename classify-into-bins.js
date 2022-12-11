@@ -50,9 +50,9 @@ const main = async () => {
       midSafeTokenIds.push(tokenId);
     }
 
-    const spicyestMid = spicyestWeighting >= MID_LOWER_BOUND ? 1 : 0;
-    const upshotMid = upshotWeighting >= MID_LOWER_BOUND ? 1 : 0;
-    const nabuMid = nabuWeighting >= MID_LOWER_BOUND ? 1 : 0;
+    const spicyestMid = spicyestWeighting >= MID_LOWER_BOUND;
+    const upshotMid = upshotWeighting >= MID_LOWER_BOUND;
+    const nabuMid = nabuWeighting >= MID_LOWER_BOUND;
 
     if (spicyestMid + upshotMid + nabuMid >= 2) {
       midTokenIds.push(tokenId);

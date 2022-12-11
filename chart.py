@@ -42,8 +42,8 @@ def plot_final_bucket_against_spicyest():
     with open("./bins/mid/azuki.json") as token_ids_json_file:
         tokenIds = [x for x in json.load(token_ids_json_file)["safeTokenIds"]]
 
-        with open("./weightings/azuki/upshot.json") as spicyest_weights_file:
-            weights = [weight for (tokenId, weight) in json.load(spicyest_weights_file).items() if tokenId in tokenIds]
+        with open("./weightings/azuki/nabu.json") as upshot_weights_file:
+            weights = [weight for (tokenId, weight) in json.load(upshot_weights_file).items() if tokenId in tokenIds]
 
             plt.scatter(x=[idx for idx, x in enumerate(weights)], y=[x for x in weights])
             plt.title("Final mid bucket weights according upshot")
