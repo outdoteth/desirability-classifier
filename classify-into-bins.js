@@ -29,10 +29,9 @@ const main = async () => {
     const nabuWeighting = nabuWeightings[tokenId];
     const upshotWeighting = upshotWeightings[tokenId];
 
-    const spicyestFloorSafe =
-      spicyestWeighting <= FLOOR_SAFE_UPPER_BOUND ? 1 : 0;
-    const nabuFloorSafe = nabuWeighting <= FLOOR_SAFE_UPPER_BOUND ? 1 : 0;
-    const upshotFloorSafe = upshotWeighting <= FLOOR_SAFE_UPPER_BOUND ? 1 : 0;
+    const spicyestFloorSafe = spicyestWeighting <= FLOOR_SAFE_UPPER_BOUND;
+    const nabuFloorSafe = nabuWeighting <= FLOOR_SAFE_UPPER_BOUND;
+    const upshotFloorSafe = upshotWeighting <= FLOOR_SAFE_UPPER_BOUND;
 
     if (spicyestFloorSafe + nabuFloorSafe + upshotFloorSafe >= 2) {
       floorSafeTokenIds.push(tokenId);
@@ -40,18 +39,12 @@ const main = async () => {
 
     const spicyestSafeMid =
       spicyestWeighting >= MID_LOWER_BOUND &&
-      spicyestWeighting <= MID_SAFE_UPPER_BOUND
-        ? 1
-        : 0;
+      spicyestWeighting <= MID_SAFE_UPPER_BOUND;
     const upshotSafeMid =
       upshotWeighting >= MID_LOWER_BOUND &&
-      upshotWeighting <= MID_SAFE_UPPER_BOUND
-        ? 1
-        : 0;
+      upshotWeighting <= MID_SAFE_UPPER_BOUND;
     const nabuSafeMid =
-      nabuWeighting >= MID_LOWER_BOUND && nabuWeighting <= MID_SAFE_UPPER_BOUND
-        ? 1
-        : 0;
+      nabuWeighting >= MID_LOWER_BOUND && nabuWeighting <= MID_SAFE_UPPER_BOUND;
 
     if (spicyestSafeMid + upshotSafeMid + nabuSafeMid >= 2) {
       midSafeTokenIds.push(tokenId);
