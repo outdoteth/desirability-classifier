@@ -1,4 +1,6 @@
 {
+  "safeUpperBound": 1.2,
+  "lowerBound": 1.0,
   "safeTokenIds": [
     "6",
     "7",

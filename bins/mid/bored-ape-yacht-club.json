@@ -1,5 +1,7 @@
 {
   "merkleRoot": "0xda6951dd6b9eb9e72fd3093ec54090948aaf70c2f8e3a7068f7b5ae9f1e35e8f",
+  "safeUpperBound": 1.5,
+  "lowerBound": 1.2,
   "tokenIds": [
     "0",
     "1",

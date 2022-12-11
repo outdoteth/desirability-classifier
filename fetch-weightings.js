@@ -115,10 +115,10 @@ const fetchUpshotWeightings = async (
       },
     }).then((r) => r.json());
 
-    offset += resp.data.assets.length - 1;
+    offset += resp.data.assets.length - 20;
     prices = prices.concat(resp.data.assets);
 
-    if (resp.data.assets.length === 1) break;
+    if (resp.data.assets.length === 20) break;
 
     console.log(`Progress: ${prices.length} / ${totalSupply}...`);
   }
@@ -168,6 +168,10 @@ const main = async () => {
     totalSupply,
     name
   );
+
+  console.log("\nspicyest count: " + Object.values(spicyestWeightings).length);
+  console.log("nabu count: " + Object.values(nabuWeightings).length);
+  console.log("upshot count: " + Object.values(upshotWeightings).length);
 };
 
 main();
