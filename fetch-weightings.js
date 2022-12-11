@@ -18,7 +18,12 @@ const fetchFloorPrice = async (address) => {
   return floor;
 };
 
-const fetchSpicyestWeightings = async (address, totalSupply, name) => {
+const fetchSpicyestWeightings = async (
+  address,
+  totalSupply,
+  name,
+  floorPrice
+) => {
   console.log("Fetching spicyest weightings...");
 
   let nextPage;
@@ -43,8 +48,6 @@ const fetchSpicyestWeightings = async (address, totalSupply, name) => {
     console.log(`Progress: ${prices.length} / ${totalSupply}...`);
   } while (nextPage);
 
-  const floorPrice = prices.sort((a, b) => a.price - b.price)[0].price;
-
   const weightings = Object.fromEntries(
     prices.map(({ tokenID, price }) => [tokenID, price / floorPrice])
   );
@@ -57,7 +60,7 @@ const fetchSpicyestWeightings = async (address, totalSupply, name) => {
   return weightings;
 };
 
-const fetchNabuWeightings = async (address, totalSupply, name) => {
+const fetchNabuWeightings = async (address, totalSupply, name, floorPrice) => {
   console.log("Fetching nabu weightings...");
 
   let offset = 0;
@@ -80,9 +83,6 @@ const fetchNabuWeightings = async (address, totalSupply, name) => {
     console.log(`Progress: ${prices.length} / ${totalSupply}...`);
   }
 
-  const floorPrice = prices.sort((a, b) => a.price_eth - b.price_eth)[0]
-    .price_eth;
-
   const weightings = Object.fromEntries(
     prices.map(({ token_id, price_eth }) => [token_id, price_eth / floorPrice])
   );
@@ -95,7 +95,12 @@ const fetchNabuWeightings = async (address, totalSupply, name) => {
   return weightings;
 };
 
-const fetchUpshotWeightings = async (address, totalSupply, name) => {
+const fetchUpshotWeightings = async (
+  address,
+  totalSupply,
+  name,
+  floorPrice
+) => {
   console.log("Fetching upshot weightings...");
 
   let offset = 0;
@@ -117,16 +122,6 @@ const fetchUpshotWeightings = async (address, totalSupply, name) => {
 
     console.log(`Progress: ${prices.length} / ${totalSupply}...`);
   }
-
-  const floorPrice = Number(
-    formatEther(
-      prices
-        .slice()
-        .sort(
-          (a, b) => formatEther(a.appraisal.wei) - formatEther(b.appraisal.wei)
-        )[0].appraisal.wei
-    )
-  );
 
   const weightings = Object.fromEntries(
     prices.map(({ token_id, appraisal: { wei } }) => [
@@ -156,15 +151,22 @@ const main = async () => {
   const spicyestWeightings = await fetchSpicyestWeightings(
     address,
     totalSupply,
-    name
+    name,
+    floorPrice
   );
 
-  const nabuWeightings = await fetchNabuWeightings(address, totalSupply, name);
+  const nabuWeightings = await fetchNabuWeightings(
+    address,
+    totalSupply,
+    name,
+    floorPrice
+  );
 
   const upshotWeightings = await fetchUpshotWeightings(
     address,
     totalSupply,
-    name
+    name,
+    floorPrice
   );
 
   console.log("\nspicyest count: " + Object.values(spicyestWeightings).length);
