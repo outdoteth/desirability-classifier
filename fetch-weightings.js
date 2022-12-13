@@ -24,7 +24,7 @@ const fetchSpicyestWeightings = async (
   name,
   floorPrice
 ) => {
-  console.log("Fetching spicyest weightings...");
+  console.log("\nFetching spicyest weightings...");
 
   let nextPage;
   let prices = [];
@@ -45,7 +45,9 @@ const fetchSpicyestWeightings = async (
     nextPage = resp.next_page;
     prices = prices.concat(resp.prices);
 
-    console.log(`Progress: ${prices.length} / ${totalSupply}...`);
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
+    process.stdout.write(`Progress: ${prices.length} / ${totalSupply}...`);
   } while (nextPage);
 
   const weightings = Object.fromEntries(
@@ -61,7 +63,7 @@ const fetchSpicyestWeightings = async (
 };
 
 const fetchNabuWeightings = async (address, totalSupply, name, floorPrice) => {
-  console.log("Fetching nabu weightings...");
+  console.log("\n\nFetching nabu weightings...");
 
   let offset = 0;
   let prices = [];
@@ -80,7 +82,9 @@ const fetchNabuWeightings = async (address, totalSupply, name, floorPrice) => {
 
     if (resp.tokens.length === 0) break;
 
-    console.log(`Progress: ${prices.length} / ${totalSupply}...`);
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
+    process.stdout.write(`Progress: ${prices.length} / ${totalSupply}...`);
   }
 
   const weightings = Object.fromEntries(
@@ -101,7 +105,7 @@ const fetchUpshotWeightings = async (
   name,
   floorPrice
 ) => {
-  console.log("Fetching upshot weightings...");
+  console.log("\n\nFetching upshot weightings...");
 
   let offset = 0;
   let prices = [];
@@ -120,7 +124,9 @@ const fetchUpshotWeightings = async (
 
     if (resp.data.assets.length === 0) break;
 
-    console.log(`Progress: ${prices.length} / ${totalSupply}...`);
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
+    process.stdout.write(`Progress: ${prices.length} / ${totalSupply}...`);
   }
 
   const weightings = Object.fromEntries(
@@ -132,6 +138,62 @@ const fetchUpshotWeightings = async (
 
   fs.writeFileSync(
     "./weightings/" + name + "/upshot.json",
+    JSON.stringify(weightings, null, 2)
+  );
+
+  return weightings;
+};
+
+const fetchNftbankWeightings = async (
+  address,
+  totalSupply,
+  name,
+  floorPrice
+) => {
+  console.log("\n\nFetching nftbank weightings...");
+
+  let currentId = 0;
+  let prices = [];
+  while (true) {
+    const params = Array.from({ length: 100 }, (_, i) =>
+      Math.min(currentId + i, totalSupply)
+    ).map((tokenId) => ({
+      networkId: "ethereum",
+      assetContract: address,
+      tokenId,
+    }));
+
+    const url = `https://api.nftbank.run/v1/nft/estimate/bulk`;
+
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: {
+        accept: "*/*",
+        "content-type": "application/json",
+        "X-API-Key": process.env.NFTBANK_API_KEY,
+      },
+      body: JSON.stringify({ params }),
+    }).then((r) => r.json());
+
+    currentId += 100;
+    prices = prices.concat(resp.data);
+
+    if (prices.length >= totalSupply) break;
+
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
+    process.stdout.write(`Progress: ${prices.length} / ${totalSupply}...`);
+  }
+
+  const weightings = Object.fromEntries(
+    prices.map(({ item: { tokenId }, estimate: { eth } }) => [
+      tokenId,
+      Number(eth) / floorPrice,
+    ])
+  );
+
+  fs.writeFileSync(
+    "./weightings/" + name + "/nftbank.json",
     JSON.stringify(weightings, null, 2)
   );
 
@@ -169,9 +231,17 @@ const main = async () => {
     floorPrice
   );
 
+  // const nftbankWeightings = await fetchNftbankWeightings(
+  //   address,
+  //   totalSupply,
+  //   name,
+  //   floorPrice
+  // );
+
   console.log("\nspicyest count: " + Object.values(spicyestWeightings).length);
   console.log("nabu count: " + Object.values(nabuWeightings).length);
   console.log("upshot count: " + Object.values(upshotWeightings).length);
+  // console.log("nftbank count: " + Object.values(nftbankWeightings).length);
 };
 
 main();
