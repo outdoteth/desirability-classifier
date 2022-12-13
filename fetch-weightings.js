@@ -238,7 +238,9 @@ const main = async () => {
   //   floorPrice
   // );
 
-  console.log("\nspicyest count: " + Object.values(spicyestWeightings).length);
+  console.log(
+    "\n\nspicyest count: " + Object.values(spicyestWeightings).length
+  );
   console.log("nabu count: " + Object.values(nabuWeightings).length);
   console.log("upshot count: " + Object.values(upshotWeightings).length);
   // console.log("nftbank count: " + Object.values(nftbankWeightings).length);
