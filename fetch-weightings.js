@@ -110,7 +110,7 @@ const fetchUpshotWeightings = async (
   let offset = 0;
   let prices = [];
   while (true) {
-    const url = `https://api.upshot.xyz/v2/collections/${address}/assets?limit=500&offset=${offset}&include_stats=true&include_count=false&sort_order=last_sale_wei`;
+    const url = `https://api.upshot.xyz/v2/collections/${address}/assets?limit=500&offset=${offset}&include_stats=true&include_count=false&sort_order=last_sale_wei&listing=false`;
 
     const resp = await fetch(url, {
       headers: {
@@ -163,7 +163,7 @@ const fetchNftbankWeightings = async (
       tokenId,
     }));
 
-    const url = `https://api.nftbank.run/v1/nft/estimate/bulk`;
+    const url = `https://api-eu.nftbank.run/v1/nft/estimate/bulk`;
 
     const resp = await fetch(url, {
       method: "POST",
@@ -200,6 +200,16 @@ const fetchNftbankWeightings = async (
   return weightings;
 };
 
+const time = async (promise) => {
+  const start = Date.now();
+  const result = await promise;
+  const end = Date.now();
+
+  console.log(`\nTook: ${(end - start) / 1000}s`);
+
+  return result;
+};
+
 const main = async () => {
   const name = process.argv[2];
   const address = process.argv[3];
@@ -210,40 +220,28 @@ const main = async () => {
   const floorPrice = await fetchFloorPrice(address);
   console.log("Floor price: " + floorPrice + " ETH");
 
-  const spicyestWeightings = await fetchSpicyestWeightings(
-    address,
-    totalSupply,
-    name,
-    floorPrice
+  const spicyestWeightings = await time(
+    fetchSpicyestWeightings(address, totalSupply, name, floorPrice)
   );
 
-  const nabuWeightings = await fetchNabuWeightings(
-    address,
-    totalSupply,
-    name,
-    floorPrice
+  const nabuWeightings = await time(
+    fetchNabuWeightings(address, totalSupply, name, floorPrice)
   );
 
-  const upshotWeightings = await fetchUpshotWeightings(
-    address,
-    totalSupply,
-    name,
-    floorPrice
+  const upshotWeightings = await time(
+    fetchUpshotWeightings(address, totalSupply, name, floorPrice)
   );
 
-  // const nftbankWeightings = await fetchNftbankWeightings(
-  //   address,
-  //   totalSupply,
-  //   name,
-  //   floorPrice
-  // );
+  const nftbankWeightings = await time(
+    fetchNftbankWeightings(address, totalSupply, name, floorPrice)
+  );
 
   console.log(
     "\n\nspicyest count: " + Object.values(spicyestWeightings).length
   );
   console.log("nabu count: " + Object.values(nabuWeightings).length);
   console.log("upshot count: " + Object.values(upshotWeightings).length);
-  // console.log("nftbank count: " + Object.values(nftbankWeightings).length);
+  console.log("nftbank count: " + Object.values(nftbankWeightings).length);
 };
 
 main();

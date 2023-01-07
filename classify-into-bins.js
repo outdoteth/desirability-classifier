@@ -7,17 +7,18 @@ const main = async () => {
 
   console.log("Generating desirability bins for " + name);
 
-  const [spicyestWeightings, nabuWeightings, upshotWeightings] = [
-    "spicyest",
-    "nabu",
-    "upshot",
-  ].map((provider) =>
+  const [
+    spicyestWeightings,
+    nabuWeightings,
+    upshotWeightings,
+    nftbankWeightings,
+  ] = ["spicyest", "nabu", "upshot", "nftbank"].map((provider) =>
     JSON.parse(fs.readFileSync(`./weightings/${name}/${provider}.json`, "utf8"))
   );
 
-  const FLOOR_SAFE_UPPER_BOUND = 1.25;
+  const FLOOR_SAFE_UPPER_BOUND = 0.98;
   const MID_LOWER_BOUND = FLOOR_SAFE_UPPER_BOUND;
-  const MID_SAFE_UPPER_BOUND = 2;
+  const MID_SAFE_UPPER_BOUND = 1.5;
 
   // generate bins
   const floorSafeTokenIds = [];
@@ -28,12 +29,26 @@ const main = async () => {
   )) {
     const nabuWeighting = nabuWeightings[tokenId];
     const upshotWeighting = upshotWeightings[tokenId];
+    const nftbankWeighting = nftbankWeightings[tokenId];
+
+    if (
+      !Number.isFinite(nabuWeighting) ||
+      !Number.isFinite(upshotWeighting) ||
+      !Number.isFinite(nftbankWeighting) ||
+      !Number.isFinite(spicyestWeighting)
+    ) {
+      continue;
+    }
 
     const spicyestFloorSafe = spicyestWeighting <= FLOOR_SAFE_UPPER_BOUND;
     const nabuFloorSafe = nabuWeighting <= FLOOR_SAFE_UPPER_BOUND;
     const upshotFloorSafe = upshotWeighting <= FLOOR_SAFE_UPPER_BOUND;
+    const nftbankFloorSafe = nftbankWeighting <= FLOOR_SAFE_UPPER_BOUND;
 
-    if (spicyestFloorSafe + nabuFloorSafe + upshotFloorSafe >= 2) {
+    if (
+      spicyestFloorSafe + nabuFloorSafe + upshotFloorSafe + nftbankFloorSafe >=
+      3
+    ) {
       floorSafeTokenIds.push(tokenId);
     }
 
@@ -45,16 +60,20 @@ const main = async () => {
       upshotWeighting <= MID_SAFE_UPPER_BOUND;
     const nabuSafeMid =
       nabuWeighting >= MID_LOWER_BOUND && nabuWeighting <= MID_SAFE_UPPER_BOUND;
+    const nftbankSafeMid =
+      nftbankWeighting >= MID_LOWER_BOUND &&
+      nftbankWeighting <= MID_SAFE_UPPER_BOUND;
 
-    if (spicyestSafeMid + upshotSafeMid + nabuSafeMid >= 2) {
+    if (spicyestSafeMid + upshotSafeMid + nabuSafeMid + nftbankSafeMid >= 3) {
       midSafeTokenIds.push(tokenId);
     }
 
     const spicyestMid = spicyestWeighting >= MID_LOWER_BOUND;
     const upshotMid = upshotWeighting >= MID_LOWER_BOUND;
     const nabuMid = nabuWeighting >= MID_LOWER_BOUND;
+    const nftMid = nftbankWeighting >= MID_LOWER_BOUND;
 
-    if (spicyestMid + upshotMid + nabuMid >= 2) {
+    if (spicyestMid + upshotMid + nabuMid + nftMid >= 3) {
       midTokenIds.push(tokenId);
     }
   }
