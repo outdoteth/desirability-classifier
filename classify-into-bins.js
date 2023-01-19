@@ -16,9 +16,9 @@ const main = async () => {
     JSON.parse(fs.readFileSync(`./weightings/${name}/${provider}.json`, "utf8"))
   );
 
-  const FLOOR_SAFE_UPPER_BOUND = 0.98;
+  const FLOOR_SAFE_UPPER_BOUND = 1.05;
   const MID_LOWER_BOUND = FLOOR_SAFE_UPPER_BOUND;
-  const MID_SAFE_UPPER_BOUND = 1.5;
+  const MID_SAFE_UPPER_BOUND = 1.3;
 
   // generate bins
   const floorSafeTokenIds = [];
@@ -89,7 +89,7 @@ const main = async () => {
   const floorBin = {
     safeUpperBound: FLOOR_SAFE_UPPER_BOUND,
     lowerBound: 1.0,
-    safeTokenIds: floorSafeTokenIds,
+    // safeTokenIds: floorSafeTokenIds,
   };
 
   fs.writeFileSync(`./bins/mid/${name}.json`, JSON.stringify(midBin, null, 2));

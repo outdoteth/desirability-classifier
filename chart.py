@@ -27,11 +27,11 @@ def plot_upshot_against_spicyest():
     with open("./weightings/azuki/spicyest.json") as weights_json_file:
         tokenIds = [tokenId for (tokenId, weight) in json.load(weights_json_file).items() if weight > 0.98 and weight < 1.5]
 
-        with open("./weightings/azuki/upshot.json") as upshot_weights_file:
+        with open("./weightings/azuki/nftbank.json") as upshot_weights_file:
             weights = [weight for (tokenId, weight) in json.load(upshot_weights_file).items() if tokenId in tokenIds]
 
             plt.scatter(x=[idx for idx, x in enumerate(weights)], y=[x for x in weights])
-            plt.title("Mid bucket weights according to upshot")
+            plt.title("Mid bucket weights according to nftbank")
             plt.xlabel("Index")
             plt.ylabel("Weight")
             plt.axhline(y=0.98, color='red', linestyle='-', label="lower bound (0.98")
@@ -43,11 +43,11 @@ def plot_upshot_against_final():
     with open("./bins/mid/azuki.json") as token_ids_json_file:
         tokenIds = [x for x in json.load(token_ids_json_file)["safeTokenIds"]]
 
-        with open("./weightings/azuki/spicyest.json") as upshot_weights_file:
+        with open("./weightings/azuki/nftbank.json") as upshot_weights_file:
             weights = [weight for (tokenId, weight) in json.load(upshot_weights_file).items() if tokenId in tokenIds]
 
             plt.scatter(x=[idx for idx, x in enumerate(weights)], y=[x for x in weights])
-            plt.title("Final mid bucket weights according to spicyest")
+            plt.title("Final mid bucket weights according to nftbank")
             plt.xlabel("Index")
             plt.ylabel("Weight")
             plt.axhline(y=0.98, color='red', linestyle='-', label="lower bound (0.98")
@@ -55,7 +55,7 @@ def plot_upshot_against_final():
             plt.legend()
             plt.show()
 
-# plot_spicyest_weights()
+plot_spicyest_weights()
 # plot_spicyest_mids()
-plot_upshot_against_spicyest()
+# plot_upshot_against_spicyest()
 # plot_upshot_against_final()

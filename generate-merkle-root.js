@@ -1,18 +1,14 @@
 const fs = require("fs");
 const path = require("path");
-const { MerkleTree } = require("merkletreejs");
-const keccak256 = require("keccak256");
-const { defaultAbiCoder } = require("ethers/lib/utils");
+const { StandardMerkleTree } = require("@openzeppelin/merkle-tree");
 
 const generateMerkleRoot = (tokenIds) => {
-  const leaves = tokenIds.map((v) =>
-    keccak256(defaultAbiCoder.encode(["uint256"], [v]))
+  const tree = StandardMerkleTree.of(
+    tokenIds.map((v) => [v]),
+    ["uint256"]
   );
 
-  const tree = new MerkleTree(leaves, keccak256, { sort: true });
-  const root = tree.getHexRoot();
-
-  return root;
+  return tree.root;
 };
 
 module.exports = { generateMerkleRoot };
